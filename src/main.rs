@@ -3,12 +3,12 @@ mod event_bus;
 mod event_store;
 mod types;
 
-use crate::aggregator::{DeviceAggregate, IoTCommandHandler};
+use crate::aggregator::IoTCommandHandler;
 use crate::event_bus::{
     AlertManager, DataPersistenceHandler, DeviceConnectionMonitor, EventBus, EventHandler,
     SensorDataValidator, TimeSeriesAggregator,
 };
-use crate::event_store::{EventStoreError, PostgresEventStore};
+use crate::event_store::PostgresEventStore;
 use crate::types::*;
 
 use anyhow::Result;
