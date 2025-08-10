@@ -1,0 +1,170 @@
+[package]
+name = "iotflow"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "Event-driven IoT data pipeline architecture"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/yourusername/iotflow"
+keywords = ["iot", "event-sourcing", "data-pipeline", "rust", "postgresql"]
+categories = ["database", "embedded", "network-programming"]
+
+[dependencies]
+# Core async runtime
+tokio = { version = "1.0", features = ["full"] }
+tokio-stream = { version = "0.1", features = ["sync"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Database
+sqlx = { version = "0.7", features = [
+    "runtime-tokio-rustls", 
+    "postgres", 
+    "chrono", 
+    "uuid", 
+    "json",
+    "migrate",
+    "macros"
+] }
+
+# Utilities
+uuid = { version = "1.0", features = ["serde", "v4", "v5"] }
+chrono = { version = "0.4", features = ["serde"] }
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Async traits
+async-trait = "0.1"
+
+# Logging and tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Concurrent data structures
+dashmap = "5.0"
+parking_lot = "0.12"
+
+# Random number generation for simulation
+rand = { version = "0.8", optional = true }
+
+# Optional: MQTT client for IoT device communication
+rumqttc = { version = "0.22", optional = true }
+
+# Optional: Protocol Buffers for efficient serialization
+prost = { version = "0.11", optional = true }
+prost-types = { version = "0.11", optional = true }
+
+# Optional: Metrics and monitoring
+metrics = { version = "0.21", optional = true }
+metrics-exporter-prometheus = { version = "0.12", optional = true }
+
+# Optional: Configuration management
+config = { version = "0.13", optional = true }
+
+# Optional: HTTP server for REST API
+axum = { version = "0.7", optional = true }
+tower = { version = "0.4", optional = true }
+tower-http = { version = "0.5", features = ["cors", "trace"], optional = true }
+
+[dev-dependencies]
+tokio-test = "0.4"
+tempfile = "3.0"
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "json"] }
+
+[features]
+default = ["simulation", "mqtt", "metrics", "api"]
+
+# Enable IoT device simulation
+simulation = ["dep:rand"]
+
+# Enable MQTT support for real IoT devices
+mqtt = ["dep:rumqttc"]
+
+# Enable Protocol Buffers for efficient serialization
+protobuf = ["dep:prost", "dep:prost-types"]
+
+# Enable metrics and monitoring
+metrics = ["dep:metrics", "dep:metrics-exporter-prometheus"]
+
+# Enable configuration file support
+config = ["dep:config"]
+
+# Enable REST API server
+api = ["dep:axum", "dep:tower", "dep:tower-http"]
+
+# Enable all features
+full = ["simulation", "mqtt", "protobuf", "metrics", "config", "api"]
+
+[profile.dev]
+opt-level = 0
+debug = true
+split-debuginfo = "packed"
+debug-assertions = true
+overflow-checks = true
+lto = false
+panic = "unwind"
+incremental = true
+codegen-units = 256
+rpath = false
+
+[profile.release]
+opt-level = 3
+debug = false
+split-debuginfo = "packed"
+debug-assertions = false
+overflow-checks = false
+lto = true
+panic = "abort"
+incremental = false
+codegen-units = 1
+rpath = false
+
+[profile.test]
+opt-level = 0
+debug = 2
+debug-assertions = true
+overflow-checks = true
+incremental = true
+codegen-units = 256
+
+# Cargo configuration for better performance
+[profile.release.build-override]
+opt-level = 0
+
+[profile.release.package."*"]
+codegen-units = 1
+
+[[bin]]
+name = "iotflow"
+path = "src/main.rs"
+
+# Note: Additional binaries can be added when the corresponding files are created
+# [[bin]]
+# name = "iot-simulator"
+# path = "src/bin/simulator.rs"
+# required-features = ["simulation"]
+
+# [[bin]]
+# name = "iot-api"
+# path = "src/bin/api_server.rs"
+# required-features = ["api"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+# Build script for Protocol Buffers (if using protobuf feature)
+# [build-dependencies]
+# prost-build = { version = "0.11", optional = true }
+
+# Example environment variables for development
+# Create a .env file with these variables:
+# DATABASE_URL=postgresql://postgres:password@localhost/iotflow
+# RUST_LOG=info
+# MQTT_BROKER=mqtt://localhost:1883
+# API_HOST=0.0.0.0
+# API_PORT=8080
+# PROMETHEUS_PORT=9090
